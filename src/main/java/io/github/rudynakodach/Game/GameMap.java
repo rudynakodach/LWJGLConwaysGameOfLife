@@ -67,10 +67,32 @@ public class GameMap {
     }
 
     public void update() {
-        Chunk[] arr = invalidatedChunks.toArray(new Chunk[0]);
+        Map<Chunk, Cell[][]> cachedChanges = new HashMap<>();
 
-        for (Chunk chunk : arr) {
-            chunk.update();
+        for (int cY = 0; cY < mapHeight; cY++) {
+            for (int cX = 0; cX < mapWidth; cX++) {
+                Chunk c = getChunkAt(cX, cY);
+
+                if(invalidatedChunks.contains(c)) {
+                    cachedChanges.put(c, c.tick());
+                }
+            }
+        }
+
+        for(Map.Entry<Chunk, Cell[][]> entry : cachedChanges.entrySet()) {
+            Cell[][] cells = entry.getValue();
+            Chunk c = entry.getKey();
+
+            for (int y = 0; y < chunkHeight; y++) {
+                for (int x = 0; x < chunkWidth; x++) {
+                    Cell oldCell = c.getCell(x, y);
+                    Cell newCell = cells[y][x];
+
+                    if(oldCell != newCell) {
+                        c.setCell(newCell, x, y);
+                    }
+                }
+            }
         }
     }
 
@@ -117,6 +139,21 @@ public class GameMap {
         }
 
         return map;
+    }
+
+    public void setCellAbsolute(Cell cell, int x, int y) {
+        int chunkX = x / chunkWidth;
+        int chunkY = y / chunkHeight;
+
+        int posX = x % chunkWidth;
+        int posY = y % chunkWidth;
+
+        Chunk c = getChunkAt(chunkX, chunkY);
+        if(c != null) {
+            c.setCell(cell, posX, posY);
+        } else {
+            throw new RuntimeException("Cannot find chunk (%d, %d)".formatted(chunkX, chunkY));
+        }
     }
 
     public Chunk getChunkAt(int x, int y) {

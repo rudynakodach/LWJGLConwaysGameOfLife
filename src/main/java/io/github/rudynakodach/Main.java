@@ -3,24 +3,30 @@ package io.github.rudynakodach;
 import io.github.rudynakodach.Game.Cell;
 import io.github.rudynakodach.Game.Chunk;
 import io.github.rudynakodach.Game.GameMap;
-
-import java.util.List;
+import io.github.rudynakodach.Game.lwjgl.Window;
 
 import static io.github.rudynakodach.utils.ANSIColors.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        GameMap map = new GameMap(2, 2, 2);
+        GameMap map = new GameMap(22, 16, 4);
         map.createRectMap();
 
-        map.getChunkAt(0, 0).setCell(new Cell(), 1, 1);
-        map.getChunkAt(1, 0).setCell(new Cell(), 0, 0);
+        map.setCellAbsolute(new Cell(), 2, 2);
+        map.setCellAbsolute(new Cell(), 2, 3);
+        map.setCellAbsolute(new Cell(), 2, 4);
+        map.setCellAbsolute(new Cell(), 2, 5);
 
-        printMap(map);
+        map.setCellAbsolute(new Cell(), 18, 18);
+        map.setCellAbsolute(new Cell(), 18, 19);
+        map.setCellAbsolute(new Cell(), 17, 19);
+        map.setCellAbsolute(new Cell(), 18, 20);
+        map.setCellAbsolute(new Cell(), 19, 20);
 
-        List<Cell> cells = map.getChunkAt(0, 0).getAdjacentCells(1, 0);
-        System.out.print("\n" + cells.size());
+        Window w = new Window(map);
+
+        w.run();
     }
 
     private static void printMap(GameMap map) {
@@ -33,9 +39,9 @@ public class Main {
                         Cell cell = c.getCell(x, y);
 
                         if (cell != null) {
-                            System.out.print(BACKGROUND_GREEN + "#");
+                            System.out.print(BACKGROUND_GREEN + c.getAdjacentCells(x, y).size());
                         } else {
-                            System.out.print(BACKGROUND_RED + ".");
+                            System.out.print(BACKGROUND_RED + c.getAdjacentCells(x, y).size());
                         }
                     }
 
@@ -46,8 +52,8 @@ public class Main {
                 System.out.println(BRIGHT_BACKGROUND_WHITE);
             }
 
-            System.out.println(BACKGROUND_RED +
-                    "-".repeat(map.getChunkWidth() * map.getMapWidth() + map.getMapWidth() - 1) + BRIGHT_BACKGROUND_WHITE);
+            System.out.println(BRIGHT_BACKGROUND_WHITE +
+                    "-".repeat(map.getChunkWidth() * map.getMapWidth() + map.getMapWidth() - 1));
         }
     }
 }

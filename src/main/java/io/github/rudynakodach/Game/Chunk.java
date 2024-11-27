@@ -3,10 +3,8 @@ package io.github.rudynakodach.Game;
 
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.text.Position;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class Chunk extends Terrain {
@@ -14,8 +12,6 @@ public class Chunk extends Terrain {
 
     public final Point chunkPosition;
     private final GameMap map;
-
-    private boolean valid = true;
 
     public Chunk(Point chunkPosition, GameMap map) {
         super(DEFAULT_CHUNK_SIZE);
@@ -38,18 +34,14 @@ public class Chunk extends Terrain {
         this.map = map;
     }
 
-
-
     @Override
     public void invalidate() {
         map.invalidateChunk(chunkPosition);
-        valid = false;
     }
 
     @Override
     public void validate() {
         map.validateChunk(chunkPosition);
-        valid = true;
     }
 
     @Override
@@ -62,15 +54,30 @@ public class Chunk extends Terrain {
     }
 
     @Override
-    public void update() {
-        valid = true;
+    public Cell[][] tick() {
         validate();
 
-        System.out.println("Updating chunk " + chunkPosition);
+//        System.out.printf("Updating chunk (%d, %d)%n", chunkPosition.x, chunkPosition.y);
+
+        Cell[][] newCells = new Cell[map.chunkHeight][map.chunkWidth];
+
+        for (int y = 0; y < map.chunkHeight; y++) {
+            for (int x = 0; x < map.chunkWidth; x++) {
+                Cell currentCell = getCell(x, y);
+                int liveNeighbors = getAdjacentCells(x, y).size();
+
+                if (currentCell != null) {
+                    newCells[y][x] = (liveNeighbors == 2 || liveNeighbors == 3) ? currentCell : null;
+                } else {
+                    newCells[y][x] = (liveNeighbors == 3) ? new Cell() : null;
+                }
+            }
+        }
+
+        return newCells;
     }
 
     private boolean chunkExists(int cX, int cY) {
-        System.out.println("Checking for chunk " + cX + " " + cY);
         return map.getChunkAt(cX, cY) != null;
     }
 
@@ -82,7 +89,7 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x, chunkPosition.y - 1));
             }
-        } else if(y == map.chunkHeight) {
+        } else if(y == map.chunkHeight - 1) {
             if(chunkExists(chunkPosition.x, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x, chunkPosition.y + 1));
             }
@@ -93,7 +100,7 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y));
             }
-        } else if(x == map.chunkWidth) {
+        } else if(x == map.chunkWidth - 1) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y));
             }
@@ -104,15 +111,15 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y - 1));
             }
-        } else if(x == map.chunkWidth && y == 0) {
+        } else if(x == map.chunkWidth - 1 && y == 0) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y - 1));
             }
-        } else if(x == 0 && y == map.chunkHeight) {
+        } else if(x == 0 && y == map.chunkHeight - 1) {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y + 1));
             }
-        } else if(x == map.chunkWidth && y == map.chunkHeight) {
+        } else if(x == map.chunkWidth - 1 && y == map.chunkHeight - 1) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y + 1));
             }

@@ -3,13 +3,12 @@ package io.github.rudynakodach.Game;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.List;
 
 public abstract class Terrain {
 
     private final int width;
     private final int height;
-    protected final Cell[][] terrain;
+    protected Cell[][] terrain;
 
     protected Terrain(int size) {
         this.width = size;
@@ -33,9 +32,10 @@ public abstract class Terrain {
         }
     }
 
-    public abstract void update();
+    public abstract Cell[][] tick();
 
     public abstract void invalidate();
+
     public abstract void validate();
 
     public int getWidth() {
