@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class GameMap {
     private final Map<Point, Chunk> map;
+    private final Set<Chunk> lastUpdated = new HashSet<>();
     private final Set<Chunk> invalidatedChunks = new HashSet<>();
 
     final int mapWidth;
@@ -67,6 +68,9 @@ public class GameMap {
     }
 
     public void update() {
+        lastUpdated.clear();
+        lastUpdated.addAll(invalidatedChunks);
+
         Map<Chunk, Cell[][]> cachedChanges = new HashMap<>();
 
         for (int cY = 0; cY < mapHeight; cY++) {
@@ -141,6 +145,10 @@ public class GameMap {
         return map;
     }
 
+    public Set<Chunk> getLastUpdated() {
+        return lastUpdated;
+    }
+
     public void setCellAbsolute(Cell cell, int x, int y) {
         int chunkX = x / chunkWidth;
         int chunkY = y / chunkHeight;
@@ -154,6 +162,21 @@ public class GameMap {
         } else {
             throw new RuntimeException("Cannot find chunk (%d, %d)".formatted(chunkX, chunkY));
         }
+    }
+
+    public @Nullable Cell getCellAbsolute(int x, int y) {
+        int chunkX = x / chunkWidth;
+        int chunkY = y / chunkHeight;
+
+        int posX = x % chunkWidth;
+        int posY = y % chunkHeight;
+
+        Chunk c = getChunkAt(chunkX, chunkY);
+        if(c != null) {
+            return c.getCell(posX, posY);
+        }
+
+        return null;
     }
 
     public Chunk getChunkAt(int x, int y) {

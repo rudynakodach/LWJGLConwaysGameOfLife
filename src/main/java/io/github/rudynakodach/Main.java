@@ -2,31 +2,27 @@ package io.github.rudynakodach;
 
 import io.github.rudynakodach.Game.Cell;
 import io.github.rudynakodach.Game.Chunk;
+import io.github.rudynakodach.Game.Game;
 import io.github.rudynakodach.Game.GameMap;
-import io.github.rudynakodach.Game.lwjgl.Window;
 
 import static io.github.rudynakodach.utils.ANSIColors.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        GameMap map = new GameMap(22, 16, 4);
-        map.createRectMap();
+        Game g = new Game();
 
-        map.setCellAbsolute(new Cell(), 2, 2);
-        map.setCellAbsolute(new Cell(), 2, 3);
-        map.setCellAbsolute(new Cell(), 2, 4);
-        map.setCellAbsolute(new Cell(), 2, 5);
+        g.getMap().setCellAbsolute(new Cell(), 2, 2);
+        g.getMap().setCellAbsolute(new Cell(), 2, 3);
+//        g.getMap().setCellAbsolute(new Cell(), 2, 4);
+//        g.getMap().setCellAbsolute(new Cell(), 2, 5);
+//        g.getMap().setCellAbsolute(new Cell(), 18, 18);
+//        g.getMap().setCellAbsolute(new Cell(), 18, 19);
+//        g.getMap().setCellAbsolute(new Cell(), 17, 19);
+//        g.getMap().setCellAbsolute(new Cell(), 18, 20);
+//        g.getMap().setCellAbsolute(new Cell(), 19, 20);
 
-        map.setCellAbsolute(new Cell(), 18, 18);
-        map.setCellAbsolute(new Cell(), 18, 19);
-        map.setCellAbsolute(new Cell(), 17, 19);
-        map.setCellAbsolute(new Cell(), 18, 20);
-        map.setCellAbsolute(new Cell(), 19, 20);
-
-        Window w = new Window(map);
-
-        w.run();
+        g.run();
     }
 
     private static void printMap(GameMap map) {

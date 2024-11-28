@@ -1,23 +1,24 @@
-package io.github.rudynakodach.Game.lwjgl.utils.window;
+package io.github.rudynakodach.Game.lwjgl.utils.components;
 
+import io.github.rudynakodach.Game.Game;
 import io.github.rudynakodach.Game.lwjgl.Window;
 
+import static org.lwjgl.glfw.GLFW.glfwGetWindowAttrib;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowTitle;
 
-public class FPSCounter {
+public class FPSCounter extends GameComponent {
 
-    private final Window window;
-
-    private long deltaTime = 0;
+    private static long deltaTime = -1;
 
     private long lastFrame = System.currentTimeMillis();
     private long timeCounter = 0;
     private long frameCount = 0;
 
-    public FPSCounter(Window w) {
-        this.window = w;
+    public FPSCounter(Game game) {
+        super(game);
     }
 
+    @Override
     public void update() {
         long currentTime = System.currentTimeMillis();
 
@@ -30,13 +31,13 @@ public class FPSCounter {
         frameCount++;
 
         if(timeCounter >= 1000) {
-            glfwSetWindowTitle(window.getWindowHandle(), window.windowTitle + " - %d FPS".formatted(frameCount));
+            glfwSetWindowTitle(game.getWindow().getWindowHandle(), game.getWindow().windowTitle + " - %d FPS".formatted(frameCount));
             timeCounter = 0;
             frameCount = 0;
         }
     }
 
-    public long getDeltaTime() {
+    public static long getDeltaTime() {
         return deltaTime;
     }
 }

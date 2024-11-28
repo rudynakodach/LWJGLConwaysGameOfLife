@@ -1,10 +1,16 @@
 package io.github.rudynakodach.Game.lwjgl;
 
 import io.github.rudynakodach.Game.Chunk;
+import io.github.rudynakodach.Game.Game;
 import io.github.rudynakodach.Game.GameMap;
 import io.github.rudynakodach.Game.lwjgl.opengl.ShaderProgram;
-import io.github.rudynakodach.Game.lwjgl.utils.window.FPSCounter;
+import io.github.rudynakodach.Game.lwjgl.utils.components.GameComponent;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
+
+import java.awt.*;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -16,12 +22,11 @@ public class Window {
     public String windowTitle = "LWJGL Conway's Game of Life";
 
     private final GameMap map;
+    private Game game;
 
-    //----------
-    private final FPSCounter counter = new FPSCounter(this);
-
-    public Window(GameMap map) {
-        this.map = map;
+    public Window(Game game) {
+        this.game = game;
+        this.map = game.getMap();
     }
 
     private void init() {
@@ -36,6 +41,8 @@ public class Window {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+        game.getInputManager().registerKeyCallback();
 
         glfwMakeContextCurrent(hWnd);
 
@@ -54,22 +61,28 @@ public class Window {
         glClearColor(1, 1, 1, 0);
 
         long latUpdateTime = 0;
-        long updateDelay = 33;
+//        long updateDelay = 33;
+        long updateDelay = 0;
 
         while(!glfwWindowShouldClose(hWnd)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glfwPollEvents();
 
-            counter.update();
+            game.getComponents().forEach(GameComponent::update);
 
             if(latUpdateTime + updateDelay <= System.currentTimeMillis()) {
-                map.update();
+                if(game.isSimulationRunning) {
+                    map.update();
+                }
 
                 latUpdateTime = System.currentTimeMillis();
             }
             render();
 
             glfwSwapBuffers(hWnd);
-            glfwPollEvents();
+
+            game.getMouse().update();
+            game.getInputManager().update();
         }
 
         program.detach();
@@ -150,7 +163,43 @@ public class Window {
             glVertex2f(1.0f, yPos);
         }
 
+        for (int cY = 0; cY < map.getMapHeight(); cY++) {
+            for (int cX = 0; cX < map.getMapWidth(); cX++) {
+                Chunk c = map.getChunkAt(cX, cY);
+
+                float x = -1f + cX * cellWidth * map.getMapWidth();
+                float y = 1 - cY * cellHeight * map.getMapHeight();
+
+                if(map.getLastUpdated().contains(c)) {
+                    glColor3f(.1f, 1f, .1f);
+
+                } else {
+                    glColor3f(1, .1f, .1f);
+                }
+
+                glVertex2f(x, y);
+                glVertex2f(x + cellWidth * map.getChunkWidth(), y);
+
+                glVertex2f(x + cellWidth * map.getChunkWidth(), y);
+                glVertex2f(x + cellWidth * map.getChunkWidth(), y + cellHeight * map.getChunkHeight());
+//
+//                glVertex2f(x + cellWidth * map.getChunkWidth(), y + cellHeight * map.getChunkHeight());
+//                glVertex2f(x, y + cellHeight * map.getChunkHeight());
+//
+//                glVertex2f(x, y + cellHeight * map.getChunkHeight());
+//                glVertex2f(x, y);
+            }
+        }
+
         glEnd();
     }
 
+    public Point getWindowSize() {
+        IntBuffer windowX = BufferUtils.createIntBuffer(1);
+        IntBuffer windowY = BufferUtils.createIntBuffer(1);
+
+        glfwGetWindowSize(hWnd, windowX, windowY);
+
+        return new Point(windowX.get(), windowY.get());
+    }
 }
