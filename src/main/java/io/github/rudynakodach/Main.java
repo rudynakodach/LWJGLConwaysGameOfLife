@@ -1,9 +1,10 @@
 package io.github.rudynakodach;
 
-import io.github.rudynakodach.Game.Cell;
-import io.github.rudynakodach.Game.Chunk;
+import io.github.rudynakodach.Game.map.elements.movable.Cell;
+import io.github.rudynakodach.Game.map.elements.MapElement;
+import io.github.rudynakodach.Game.map.chunks.Chunk;
 import io.github.rudynakodach.Game.Game;
-import io.github.rudynakodach.Game.GameMap;
+import io.github.rudynakodach.Game.map.GameMap;
 
 import static io.github.rudynakodach.utils.ANSIColors.*;
 
@@ -12,8 +13,8 @@ public class Main {
     public static void main(String[] args) {
         Game g = new Game();
 
-        g.getMap().setCellAbsolute(new Cell(), 2, 2);
-        g.getMap().setCellAbsolute(new Cell(), 2, 3);
+//        g.getMap().setElementAbsolute(new Cell(), 2, 2);
+//        g.getMap().setElementAbsolute(new Cell(), 2, 3);
 //        g.getMap().setCellAbsolute(new Cell(), 2, 4);
 //        g.getMap().setCellAbsolute(new Cell(), 2, 5);
 //        g.getMap().setCellAbsolute(new Cell(), 18, 18);
@@ -32,9 +33,9 @@ public class Main {
                     Chunk c = map.getChunkAt(cX, cY);
 
                     for (int x = 0; x < map.getChunkWidth(); x++) {
-                        Cell cell = c.getCell(x, y);
+                        MapElement mapElement = c.getCell(x, y);
 
-                        if (cell != null) {
+                        if (mapElement != null) {
                             System.out.print(BACKGROUND_GREEN + c.getAdjacentCells(x, y).size());
                         } else {
                             System.out.print(BACKGROUND_RED + c.getAdjacentCells(x, y).size());

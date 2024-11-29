@@ -1,8 +1,6 @@
 package io.github.rudynakodach.Game.lwjgl.utils.input;
 
-import io.github.rudynakodach.Game.Game;
 import io.github.rudynakodach.Game.lwjgl.Window;
-import io.github.rudynakodach.Game.lwjgl.utils.components.GameComponent;
 
 import java.util.Collections;
 import java.util.HashSet;

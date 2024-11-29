@@ -1,6 +1,10 @@
-package io.github.rudynakodach.Game;
+package io.github.rudynakodach.Game.map.chunks;
 
 
+import io.github.rudynakodach.Game.map.GameMap;
+import io.github.rudynakodach.Game.map.elements.immovable.ImmovableElement;
+import io.github.rudynakodach.Game.map.elements.movable.Cell;
+import io.github.rudynakodach.Game.map.elements.MapElement;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Point;
@@ -45,7 +49,7 @@ public class Chunk extends Terrain {
     }
 
     @Override
-    public void setCell(@Nullable Cell c, int x, int y) {
+    public void setCell(@Nullable MapElement c, int x, int y) {
         invalidate();
 
         getAdjacentChunks(x, y).forEach(Chunk::invalidate);
@@ -54,27 +58,32 @@ public class Chunk extends Terrain {
     }
 
     @Override
-    public Cell[][] tick() {
+    public MapElement[][] tick() {
         validate();
 
 //        System.out.printf("Updating chunk (%d, %d)%n", chunkPosition.x, chunkPosition.y);
 
-        Cell[][] newCells = new Cell[map.chunkHeight][map.chunkWidth];
+        MapElement[][] newMapElements = new MapElement[map.getChunkHeight()][map.getChunkWidth()];
 
-        for (int y = 0; y < map.chunkHeight; y++) {
-            for (int x = 0; x < map.chunkWidth; x++) {
-                Cell currentCell = getCell(x, y);
-                int liveNeighbors = getAdjacentCells(x, y).size();
+        for (int y = 0; y < map.getChunkHeight(); y++) {
+            for (int x = 0; x < map.getChunkWidth(); x++) {
+                MapElement currentMapElement = getCell(x, y);
+                if(currentMapElement instanceof ImmovableElement) {
+                    newMapElements[y][x] = currentMapElement;
+                    continue;
+                }
 
-                if (currentCell != null) {
-                    newCells[y][x] = (liveNeighbors == 2 || liveNeighbors == 3) ? currentCell : null;
+                int liveNeighbors = (int)getAdjacentCells(x, y).stream().filter(elem -> elem instanceof Cell).count();
+
+                if (currentMapElement != null) {
+                    newMapElements[y][x] = (liveNeighbors == 2 || liveNeighbors == 3) ? currentMapElement : null;
                 } else {
-                    newCells[y][x] = (liveNeighbors == 3) ? new Cell() : null;
+                    newMapElements[y][x] = (liveNeighbors == 3) ? new Cell() : null;
                 }
             }
         }
 
-        return newCells;
+        return newMapElements;
     }
 
     private boolean chunkExists(int cX, int cY) {
@@ -89,7 +98,7 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x, chunkPosition.y - 1));
             }
-        } else if(y == map.chunkHeight - 1) {
+        } else if(y == map.getChunkHeight() - 1) {
             if(chunkExists(chunkPosition.x, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x, chunkPosition.y + 1));
             }
@@ -100,7 +109,7 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y));
             }
-        } else if(x == map.chunkWidth - 1) {
+        } else if(x == map.getChunkWidth() - 1) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y));
             }
@@ -111,15 +120,15 @@ public class Chunk extends Terrain {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y - 1));
             }
-        } else if(x == map.chunkWidth - 1 && y == 0) {
+        } else if(x == map.getChunkWidth() - 1 && y == 0) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y - 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y - 1));
             }
-        } else if(x == 0 && y == map.chunkHeight - 1) {
+        } else if(x == 0 && y == map.getChunkHeight() - 1) {
             if(chunkExists(chunkPosition.x - 1, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x - 1, chunkPosition.y + 1));
             }
-        } else if(x == map.chunkWidth - 1 && y == map.chunkHeight - 1) {
+        } else if(x == map.getChunkWidth() - 1 && y == map.getChunkHeight() - 1) {
             if(chunkExists(chunkPosition.x + 1, chunkPosition.y + 1)) {
                 adjacent.add(map.getChunkAt(chunkPosition.x + 1, chunkPosition.y + 1));
             }
@@ -128,16 +137,14 @@ public class Chunk extends Terrain {
         return adjacent;
     }
 
-    public List<Cell> getAdjacentCells(int x, int y) {
-        List<Cell> adjacentCells = new ArrayList<>();
+    public List<MapElement> getAdjacentCells(int x, int y) {
+        List<MapElement> adjacentMapElements = new ArrayList<>();
 
         int[][] directions = {
                 {-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}
         };
 
-        for (int i = 0; i < directions.length; i++) {
-            int[] dir = directions[i];
-
+        for (int[] dir : directions) {
             int offsetX = dir[0];
             int offsetY = dir[1];
 
@@ -147,32 +154,32 @@ public class Chunk extends Terrain {
             int chunkX = chunkPosition.x;
             int chunkY = chunkPosition.y;
 
-            if(translatedX < 0) {
+            if (translatedX < 0) {
                 chunkX--;
-                translatedX += map.chunkWidth;
-            } else if(translatedX >= map.chunkWidth) {
+                translatedX += map.getChunkWidth();
+            } else if (translatedX >= map.getChunkWidth()) {
                 chunkX++;
-                translatedX -= map.chunkWidth;
+                translatedX -= map.getChunkWidth();
             }
 
-            if(translatedY < 0) {
+            if (translatedY < 0) {
                 chunkY--;
-                translatedY += map.chunkHeight;
-            } else if(translatedY >= map.mapHeight) {
+                translatedY += map.getChunkHeight();
+            } else if (translatedY >= map.getChunkHeight()) {
                 chunkY++;
-                translatedY -= map.chunkHeight;
+                translatedY -= map.getChunkHeight();
             }
 
             Chunk c = map.getChunkAt(chunkX, chunkY);
             if (c != null) {
-                Cell cell = c.getCell(translatedX, translatedY);
+                MapElement mapElement = c.getCell(translatedX, translatedY);
 
-                if(cell != null) {
-                    adjacentCells.add(cell);
+                if (mapElement != null) {
+                    adjacentMapElements.add(mapElement);
                 }
             }
         }
 
-        return adjacentCells;
+        return adjacentMapElements;
     }
 }

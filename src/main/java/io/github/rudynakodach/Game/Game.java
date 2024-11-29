@@ -1,12 +1,10 @@
 package io.github.rudynakodach.Game;
 
 import io.github.rudynakodach.Game.lwjgl.Window;
-import io.github.rudynakodach.Game.lwjgl.utils.components.FPSCounter;
-import io.github.rudynakodach.Game.lwjgl.utils.components.PreGamePlacer;
-import io.github.rudynakodach.Game.lwjgl.utils.components.GameComponent;
-import io.github.rudynakodach.Game.lwjgl.utils.components.SimulationToggle;
+import io.github.rudynakodach.Game.lwjgl.utils.components.*;
 import io.github.rudynakodach.Game.lwjgl.utils.input.InputManager;
 import io.github.rudynakodach.Game.lwjgl.utils.input.MouseManager;
+import io.github.rudynakodach.Game.map.GameMap;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,8 +31,10 @@ public class Game {
     }
 
     private void init() {
-        gameComponents.put("placer", new PreGamePlacer(this));
+        gameComponents.put("placement", new PlacementComponent(this));
         gameComponents.put("simToggle", new SimulationToggle(this));
+        gameComponents.put("gameReset", new GameResetComponent(this));
+        gameComponents.put("zoom", new ZoomComponent(this));
         gameComponents.put("fps", new FPSCounter(this));
     }
 
@@ -66,5 +66,11 @@ public class Game {
 
     public MouseManager getMouse() {
         return mouseManager;
+    }
+
+    public void reset() {
+        isSimulationRunning = false;
+
+        getMap().wipeMap();
     }
 }

@@ -1,5 +1,7 @@
-package io.github.rudynakodach.Game;
+package io.github.rudynakodach.Game.map;
 
+import io.github.rudynakodach.Game.map.chunks.Chunk;
+import io.github.rudynakodach.Game.map.elements.MapElement;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Point;
@@ -13,11 +15,11 @@ public class GameMap {
     private final Set<Chunk> lastUpdated = new HashSet<>();
     private final Set<Chunk> invalidatedChunks = new HashSet<>();
 
-    final int mapWidth;
-    final int mapHeight;
+    private final int mapWidth;
+    private final int mapHeight;
 
-    final int chunkWidth;
-    final int chunkHeight;
+    private final int chunkWidth;
+    private final int chunkHeight;
 
     public GameMap(int mapWidth, int mapHeight) {
         this.mapWidth = mapWidth;
@@ -71,7 +73,7 @@ public class GameMap {
         lastUpdated.clear();
         lastUpdated.addAll(invalidatedChunks);
 
-        Map<Chunk, Cell[][]> cachedChanges = new HashMap<>();
+        Map<Chunk, MapElement[][]> cachedChanges = new HashMap<>();
 
         for (int cY = 0; cY < mapHeight; cY++) {
             for (int cX = 0; cX < mapWidth; cX++) {
@@ -83,30 +85,48 @@ public class GameMap {
             }
         }
 
-        for(Map.Entry<Chunk, Cell[][]> entry : cachedChanges.entrySet()) {
-            Cell[][] cells = entry.getValue();
+        for(Map.Entry<Chunk, MapElement[][]> entry : cachedChanges.entrySet()) {
+            MapElement[][] mapElements = entry.getValue();
             Chunk c = entry.getKey();
 
             for (int y = 0; y < chunkHeight; y++) {
                 for (int x = 0; x < chunkWidth; x++) {
-                    Cell oldCell = c.getCell(x, y);
-                    Cell newCell = cells[y][x];
+                    MapElement oldMapElement = c.getCell(x, y);
+                    MapElement newMapElement = mapElements[y][x];
 
-                    if(oldCell != newCell) {
-                        c.setCell(newCell, x, y);
+                    if(oldMapElement != newMapElement) {
+                        c.setCell(newMapElement, x, y);
                     }
                 }
             }
         }
     }
 
+    public void createChunk(int x, int y) {
+        Point pos = new Point(x, y);
+
+        Chunk c = new Chunk(pos, this);
+        map.put(pos, c);
+    }
+
+    public void createChunk(int x, int y, int size) {
+        Point pos = new Point(x, y);
+
+        Chunk c = new Chunk(pos, size, this);
+        map.put(pos, c);
+    }
+
+    public void createChunk(int x, int y, int w, int h) {
+        Point pos = new Point(x, y);
+
+        Chunk c = new Chunk(pos, w, h, this);
+        map.put(pos, c);
+    }
+
     public void createRectMap() {
         for (int y = 0; y < this.mapHeight; y++) {
             for (int x = 0; x < this.mapWidth; x++) {
-                Point pos = new Point(x, y);
-
-                Chunk c = new Chunk(pos, this);
-                map.put(pos, c);
+                createChunk(x, y);
             }
         }
     }
@@ -114,10 +134,7 @@ public class GameMap {
     public void createRectMap(int terrainSize) {
         for (int y = 0; y < this.mapHeight; y++) {
             for (int x = 0; x < this.mapWidth; x++) {
-                Point pos = new Point(x, y);
-
-                Chunk c = new Chunk(pos, terrainSize, this);
-                map.put(pos, c);
+               createChunk(x, y, terrainSize);
             }
         }
     }
@@ -125,11 +142,22 @@ public class GameMap {
     public void createRectMap(int terrainWidth, int terrainHeight) {
         for (int y = 0; y < this.mapHeight; y++) {
             for (int x = 0; x < this.mapWidth; x++) {
-                Point pos = new Point(x, y);
-
-                Chunk c = new Chunk(pos, terrainWidth, terrainHeight, this);
-                map.put(pos, c);
+                createChunk(x, y, terrainWidth, terrainHeight);
             }
+        }
+    }
+
+    public void wipeChunk(int x, int y) {
+        map.put(new Point(x, y), new Chunk(new Point(x, y), chunkWidth, chunkHeight, this));
+    }
+
+    public void wipeChunk(Point p) {
+        wipeChunk(p.x, p.y);
+    }
+
+    public void wipeMap() {
+        for(Point p : map.keySet()) {
+            wipeChunk(p);
         }
     }
 
@@ -149,7 +177,7 @@ public class GameMap {
         return lastUpdated;
     }
 
-    public void setCellAbsolute(Cell cell, int x, int y) {
+    public void setElementAbsolute(MapElement mapElement, int x, int y) {
         int chunkX = x / chunkWidth;
         int chunkY = y / chunkHeight;
 
@@ -158,13 +186,13 @@ public class GameMap {
 
         Chunk c = getChunkAt(chunkX, chunkY);
         if(c != null) {
-            c.setCell(cell, posX, posY);
+            c.setCell(mapElement, posX, posY);
         } else {
             throw new RuntimeException("Cannot find chunk (%d, %d)".formatted(chunkX, chunkY));
         }
     }
 
-    public @Nullable Cell getCellAbsolute(int x, int y) {
+    public @Nullable MapElement getElementAbsolute(int x, int y) {
         int chunkX = x / chunkWidth;
         int chunkY = y / chunkHeight;
 
