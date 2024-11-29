@@ -45,7 +45,7 @@ public class InputManager {
 
     @SuppressWarnings("SuspiciousMethodCalls")
     public boolean isKeyComboActive(int ...keys) {
-        return Collections.singleton(keys).containsAll(activeKeys);
+        return activeKeys.containsAll(Collections.singleton(keys));
     }
 
     public void update() {

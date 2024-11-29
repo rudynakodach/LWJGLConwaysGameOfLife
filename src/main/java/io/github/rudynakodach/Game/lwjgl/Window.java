@@ -97,7 +97,6 @@ public class Window {
 
             Point windowSize = getWindowSize();
 
-
             //todo: make camera zoom work
             float normalizedOffsetX = offsetX / windowSize.x;
             float normalizedOffsetY = offsetY / windowSize.y;
@@ -112,7 +111,7 @@ public class Window {
             float bottom = normalizedOffsetY - halfHeight + 0.5f;
             float top = normalizedOffsetY + halfHeight - 0.5f;
 
-            System.out.println(String.format("Left: %f, Right: %f, Bottom: %f, Top: %f", left, right, bottom, top));
+//            System.out.println(String.format("Left: %f, Right: %f, Bottom: %f, Top: %f", left, right, bottom, top));
 
             glOrtho(left, right, bottom, top, -1, 1);
 

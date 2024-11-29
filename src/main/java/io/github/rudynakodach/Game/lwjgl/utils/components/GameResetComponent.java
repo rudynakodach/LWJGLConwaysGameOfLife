@@ -13,6 +13,8 @@ public class GameResetComponent extends GameComponent {
     public void update() {
         if(game.getInputManager().isKeyDown(GLFW_KEY_R)) {
             game.reset();
+        } else if(game.getInputManager().isKeyDown(GLFW_KEY_T)) {
+            glfwSetWindowShouldClose(game.getWindow().getWindowHandle(), true);
         }
     }
 }

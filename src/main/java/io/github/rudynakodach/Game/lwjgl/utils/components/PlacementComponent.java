@@ -9,6 +9,7 @@ import io.github.rudynakodach.Game.Game;
 import java.awt.Point;
 import java.util.HashMap;
 
+import static io.github.rudynakodach.Game.lwjgl.utils.components.ZoomComponent.MAX_ZOOM;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -41,8 +42,13 @@ public class PlacementComponent extends GameComponent {
         int windowX = windowSize.x;
         int windowY = windowSize.y;
 
+//        float posX = game.getWindow().getZoomOffsetX() + (mouseX / (float)windowX) * ((windowX / game.getWindow().getZoomLevel()) / MAX_ZOOM);
+//        float posY = game.getWindow().getZoomOffsetY() + (mouseY / (float)windowY) * ((windowY / game.getWindow().getZoomLevel()) / MAX_ZOOM);
+
         float posX = (float) mouseX / windowX;
         float posY = (float) mouseY / windowY;
+
+        System.out.println("%f %f".formatted(posX, posY));
 
         float chunkWidth = (float) 1 / game.getMap().getMapWidth();
         float chunkHeight = (float) 1 / game.getMap().getMapHeight();

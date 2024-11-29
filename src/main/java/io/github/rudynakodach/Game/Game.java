@@ -21,7 +21,7 @@ public class Game {
     public boolean isSimulationRunning = false;
 
     public Game() {
-        this.map = new GameMap(3,3,3);
+        this.map = new GameMap(16, 16, 16);
         this.map.createRectMap();
 
         this.window = new Window(this);

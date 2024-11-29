@@ -11,6 +11,8 @@ import java.util.Set;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class MouseManager {
+    public static final int SCROLL_UP = 1;
+    public static final int SCROLL_DOWN = -1;
 
     private final Window window;
 
